@@ -1,0 +1,3 @@
+[submodule "submodules/Json.Fluently"]
+	path = submodules/Json.Fluently
+	url = https://github.com/psmoq/Json.Fluently
