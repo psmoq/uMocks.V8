@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{E578D744-9726-44AA-8CC0-0196AAE9D98C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Json.Fluently", "..\submodules\Json.Fluently\source\Json.Fluently\Json.Fluently.csproj", "{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uMocks", "uMocks\uMocks.csproj", "{6573A5BC-39AA-4482-8ED9-CDFCDA9F0FAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uMocks.Samples", "uMocks.Samples\uMocks.Samples.csproj", "{64AF501E-1BB2-4160-8C6E-EA9CD039F2A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6573A5BC-39AA-4482-8ED9-CDFCDA9F0FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6573A5BC-39AA-4482-8ED9-CDFCDA9F0FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6573A5BC-39AA-4482-8ED9-CDFCDA9F0FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6573A5BC-39AA-4482-8ED9-CDFCDA9F0FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64AF501E-1BB2-4160-8C6E-EA9CD039F2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64AF501E-1BB2-4160-8C6E-EA9CD039F2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64AF501E-1BB2-4160-8C6E-EA9CD039F2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64AF501E-1BB2-4160-8C6E-EA9CD039F2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AEBF8B02-960B-4CD3-9891-20C4D2E6DB5A} = {E578D744-9726-44AA-8CC0-0196AAE9D98C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F5BC09B-AC3E-42D5-8E5F-29E7D26EFBD7}
+	EndGlobalSection
+EndGlobal
