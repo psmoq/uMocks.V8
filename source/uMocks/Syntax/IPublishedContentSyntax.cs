@@ -1,12 +1,12 @@
 ﻿using System;
-using Umbraco.Core.Models;
+using Umbraco.Core.Models.PublishedContent;
 using uMocks.Builders.Abstract;
 
 namespace uMocks.Syntax
 {
   public interface IPublishedContentSyntax
   {
-    IPublishedContentSyntax WithProperty<T>(string propertyAlias, T value);
+    IPublishedContentSyntax WithProperty<T>(string propertyAlias, T value, string culture = null);
 
     IPublishedContentSyntax WithChildren(params IPublishedContent[] children);
 

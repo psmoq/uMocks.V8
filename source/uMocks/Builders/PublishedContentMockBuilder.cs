@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Moq;
-using Umbraco.Core;
-using Umbraco.Core.Models;
 using Umbraco.Core.Models.PublishedContent;
 using Umbraco.Web;
 using uMocks.Builders.Abstract;
@@ -16,12 +13,12 @@ namespace uMocks.Builders
   {
     private readonly ICollection<PublishedContentSyntax> _contentMocks = new List<PublishedContentSyntax>();
 
-    public IPublishedContentSyntax PrepareNew(string documentTypeAlias, int documentId = 0)
+    public IPublishedContentSyntax PrepareNew(string documentTypeAlias, string documentName = null, int documentId = 0)
     {
       if (documentId == 0)
         documentId = new Random().Next(8000, 12000);
 
-      var syntax = new PublishedContentSyntax(this, documentTypeAlias, documentId);
+      var syntax = new PublishedContentSyntax(this, documentTypeAlias, documentName, documentId);
 
       _contentMocks.Add(syntax);
 
@@ -45,11 +42,10 @@ namespace uMocks.Builders
 
       private readonly ICollection<IPublishedProperty> _publishedProperties = new List<IPublishedProperty>();
 
-      public PublishedContentSyntax(PublishedContentMockBuilder builder, string documentTypeAlias, int documentId)
+      public PublishedContentSyntax(PublishedContentMockBuilder builder, string documentTypeAlias, string documentName, int documentId)
       {
         _builder = builder;
         PublishedContentMock = new Mock<IPublishedContent>();
-        PublishedContentMock.Setup(c => c.DocumentTypeAlias).Returns(() => documentTypeAlias);
         PublishedContentMock.Setup(c => c.Id).Returns(documentId);
         PublishedContentMock.Setup(c => c.Properties).Returns(_publishedProperties);
         PublishedContentMock.Setup(c => c.CreateDate).Returns(DateTime.Now);
@@ -57,46 +53,42 @@ namespace uMocks.Builders
         PublishedContentMock.Setup(c => c.Path).Returns(() => "-1," + GetDocumentPath(PublishedContentMock.Object));
         PublishedContentMock.Setup(c => c.Level).Returns(() => GetDocumentLevel(PublishedContentMock.Object));
         PublishedContentMock.Setup(c => c.ItemType).Returns(PublishedItemType.Content);
-        PublishedContentMock.Setup(c => c.ContentSet).Returns(() => PublishedContentMock.Object.Siblings());
-        PublishedContentMock.Setup(c => c.GetIndex()).Returns(() => GetDocumentIndex(PublishedContentMock.Object));
+        PublishedContentMock.Setup(c => c.Name).Returns(() => documentName);
 
-        var contentTypeComposition = new Mock<IContentTypeComposition>();
-        contentTypeComposition.Setup(c => c.Alias).Returns(documentTypeAlias);
+        var contentTypeMock = new Mock<IPublishedContentType>();
+        contentTypeMock.Setup(c => c.Alias).Returns(() => documentTypeAlias);
 
-        var contentType = (PublishedContentType)Activator.CreateInstance(typeof(PublishedContentType),
-          BindingFlags.NonPublic | BindingFlags.Instance,
-          null, new object[] { contentTypeComposition.Object }, null);
-
-        PublishedContentMock.Setup(c => c.ContentType).Returns(() => contentType);
+        PublishedContentMock.Setup(c => c.ContentType).Returns(() => contentTypeMock.Object);
       }
 
-      public IPublishedContentSyntax WithProperty<T>(string propertyAlias, T value)
+      public IPublishedContentSyntax WithProperty<T>(string propertyAlias, T value, string culture = null)
       {
         var propertyMock = new Mock<IPublishedProperty>();
 
-        propertyMock.Setup(p => p.HasValue).Returns(() => value != null);
-        propertyMock.Setup(p => p.Value).Returns(value);
-        propertyMock.Setup(p => p.DataValue).Returns(value);
-        propertyMock.Setup(p => p.PropertyTypeAlias).Returns(propertyAlias);
+        propertyMock.Setup(p => p.Alias).Returns(propertyAlias);
+        propertyMock.Setup(p => p.HasValue(culture, It.IsAny<string>())).Returns(() => value != null);
+        propertyMock.Setup(p => p.GetValue(culture, It.IsAny<string>())).Returns(value);
+        propertyMock.Setup(p => p.GetSourceValue(culture, It.IsAny<string>())).Returns(value);
+        
+
+        var propertyTypeMock = new Mock<IPublishedPropertyType>();
+
+        propertyTypeMock.Setup(p => p.Alias).Returns(propertyAlias);
+
+        propertyMock.Setup(p => p.PropertyType).Returns(() => propertyTypeMock.Object);
 
         _publishedProperties.Add(propertyMock.Object);
 
         PublishedContentMock.Setup(c => c.GetProperty(It.Is<string>(x => x == propertyAlias)))
           .Returns(() =>
           {
-            return _publishedProperties.First(p => p.PropertyTypeAlias == propertyAlias);
+            return _publishedProperties.First(p => p.PropertyType.Alias == propertyAlias);
           });
 
-        PublishedContentMock.Setup(c => c.GetProperty(It.Is<string>(x => x == propertyAlias), It.IsAny<bool>()))
+        PublishedContentMock.Setup(c => c.GetProperty(It.Is<string>(x => x == propertyAlias)))
           .Returns(() =>
           {
-            return _publishedProperties.First(p => p.PropertyTypeAlias == propertyAlias);
-          });
-
-        PublishedContentMock.Setup(c => c[It.Is<string>(x => x == propertyAlias)])
-          .Returns(() =>
-          {
-            return _publishedProperties.First(p => p.PropertyTypeAlias == propertyAlias);
+            return _publishedProperties.First(p => p.PropertyType.Alias == propertyAlias);
           });
 
         return this;
@@ -107,7 +99,8 @@ namespace uMocks.Builders
         foreach (var child in children)
           _builder.GetMockFor(child).Setup(c => c.Parent).Returns(PublishedContentMock.Object);
 
-        PublishedContentMock.Setup(c => c.Children).Returns(children);
+        PublishedContentMock.Setup(c => c.Children).Returns(() => children);
+        PublishedContentMock.Setup(c => c.ChildrenForAllCultures).Returns(() => children);
 
         return this;
       }
@@ -129,6 +122,7 @@ namespace uMocks.Builders
         currentChildren.Add(PublishedContentMock.Object);
 
         parentMock.Setup(c => c.Children).Returns(currentChildren);
+        parentMock.Setup(c => c.ChildrenForAllCultures).Returns(currentChildren);
         PublishedContentMock.Setup(c => c.Parent).Returns(parent);
 
         return this;
@@ -174,11 +168,6 @@ namespace uMocks.Builders
       public IPublishedContent Build()
       {
         return PublishedContentMock.Object;
-      }
-
-      private int GetDocumentIndex(IPublishedContent content)
-      {
-        return content.Siblings().FindIndex(0, c => c.Id == content.Id);
       }
 
       private string GetDocumentPath(IPublishedContent content)

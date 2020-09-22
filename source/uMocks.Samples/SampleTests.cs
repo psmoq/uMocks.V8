@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Umbraco.Core.Models;
+using Umbraco.Core.Models.PublishedContent;
 using Umbraco.Web;
 using uMocks.Extensions;
 
@@ -40,22 +40,20 @@ namespace uMocks.Samples
       // Assert
 
       // getting basic content data are supported in all possible ways
-      Assert.AreEqual("documentTypeAlias", doc1.DocumentTypeAlias);
       Assert.AreEqual("documentTypeAlias", doc1.ContentType.Alias);
-      Assert.AreEqual("propValue",doc1.GetPropertyValue<string>("propAlias"));
-      Assert.AreEqual("propValue", doc1.GetPropertyValue("propAlias"));
-      Assert.AreEqual("propValue", doc1.GetProperty("propAlias").Value);
-      Assert.AreEqual("propValue", ((IPublishedProperty)doc1["propAlias"]).Value);
+      Assert.AreEqual("documentTypeAlias", doc1.ContentType.Alias);
+      Assert.AreEqual("propValue",doc1.Value<string>("propAlias"));
+      Assert.AreEqual("propValue", doc1.Value("propAlias"));
+      Assert.AreEqual("propValue", doc1.GetProperty("propAlias").Value());
+      Assert.AreEqual("propValue", doc1.Properties.First(c => c.Alias == "propAlias").Value<string>());
 
       // parent-children relations behave as expected in scope of single mock session - relations are dynamically updated
       Assert.AreEqual("-1,1001,1002,1003", doc3.Path);
       Assert.AreEqual(2, doc2.Children.Count());
       Assert.AreEqual(1002, doc4.Parent.Id);
-      Assert.AreEqual(2, doc4.ContentSet.Count()); // siblings count
 
       // most extension methods evaluates properly (methods independent on HttpContext and ApplicationContext)
-      Assert.AreEqual(1004, doc3.FollowingSibling().Id); // following sibling of doc3 => doc4.Id
-      Assert.AreEqual(null, doc3.PrecedingSibling()); // no preceding sibling of doc3 found
+      Assert.AreEqual(1, doc3.Siblings().Count());
     }
 
     [TestMethod]
