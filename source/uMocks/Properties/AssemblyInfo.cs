@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("uMocks")]
+[assembly: AssemblyTitle("uMocks.V8")]
 [assembly: AssemblyDescription("Umbraco CMS mocking helper")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Przemyslaw Smokowski")]
-[assembly: AssemblyProduct("uMocks")]
-[assembly: AssemblyCopyright("Copyright © 2019")]
+[assembly: AssemblyProduct("uMocks.V8")]
+[assembly: AssemblyCopyright("Copyright © 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
