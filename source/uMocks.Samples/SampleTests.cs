@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Umbraco.Core.Models.PublishedContent;
+using Moq;
+using Umbraco.Core.Composing;
+using Umbraco.Core.Models;
 using Umbraco.Web;
 using uMocks.Extensions;
 
@@ -153,6 +155,20 @@ namespace uMocks.Samples
 
       // grid editor should have given property value
       Assert.AreEqual("propertyValue1", control.SelectToken("$.value.value").Value<string>("propertyName1"));
+    }
+
+    [TestMethod]
+    public void Current_Should_HaveProperImageUrlGeneratorInstance()
+    {
+      // Arrange
+      var imageUrlGeneratorMock = new Mock<IImageUrlGenerator>();
+
+      // Act
+      var session = PublishedContentMockSession.CreateNew()
+        .WithUmbracoService(imageUrlGeneratorMock.Object);
+
+      // Assert
+      Assert.AreSame(imageUrlGeneratorMock.Object, Current.ImageUrlGenerator);
     }
   }
 }
