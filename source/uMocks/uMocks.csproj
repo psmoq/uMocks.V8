@@ -261,6 +261,7 @@
     <Compile Include="Builders\Abstract\IPublishedContentMockBuilder.cs" />
     <Compile Include="Builders\GridEditorBuilder.cs" />
     <Compile Include="Builders\PublishedContentMockBuilder.cs" />
+    <Compile Include="Exceptions\MockNotFoundException.cs" />
     <Compile Include="Extensions\GridBuilderExtension.cs" />
     <Compile Include="Extensions\GridEditorExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

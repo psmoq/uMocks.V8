@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Collections;
+using System.Linq;
+using System.Reflection;
 using Moq;
 using Umbraco.Core.Composing;
-using Umbraco.Core.Models.PublishedContent;
 using uMocks.Builders;
 using uMocks.Builders.Abstract;
+using uMocks.Exceptions;
 
 namespace uMocks
 {
   public class PublishedContentMockSession
   {
+    private readonly Mock<IFactory> _factoryMock = new Mock<IFactory>();
+
     public IPublishedContentMockBuilder PublishedContentBuilder { get; }
 
     public IGridEditorBuilder GridEditorBuilder { get; }
@@ -21,6 +26,13 @@ namespace uMocks
       TryInitializeFactory();
     }
 
+    public PublishedContentMockSession WithUmbracoService<TService>(TService serviceInstance)
+    {
+      _factoryMock.Setup(c => c.GetInstance(typeof(TService))).Returns(serviceInstance);
+
+      return this;
+    }
+
     public static PublishedContentMockSession CreateNew()
     {
       return new PublishedContentMockSession();
@@ -30,15 +42,29 @@ namespace uMocks
     {
       try
       {
-        var factoryMock = new Mock<IFactory>();
-        factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns(null);
+        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>((x) =>
+        {
+          var setupInfo = GetCustomSetupInfo();
+          
+          throw new MockNotFoundException(x, setupInfo);
+        });
 
-        Current.Factory = factoryMock.Object;
+        Current.Factory = _factoryMock.Object;
       }
       catch
       {
         // swallow - 'Current' is a poor singleton
       }
+    }
+
+    private IList GetCustomSetupInfo()
+    {
+      const string fieldName = "setups";
+
+      var setupCollection = typeof(Mock<IFactory>).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_factoryMock);
+      var setups = (IList)setupCollection?.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(setupCollection);
+
+      return setups != null && setups.Count > 0 ? new ArrayList(setups).ToArray().Skip(1).ToArray() : new object[0];
     }
   }
 }
