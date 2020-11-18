@@ -273,6 +273,7 @@
     <Compile Include="Syntax\IGridSectionColumnSyntax.cs" />
     <Compile Include="Syntax\IGridSectionSyntax.cs" />
     <Compile Include="Syntax\IPublishedContentSyntax.cs" />
+    <Compile Include="UmbracoDefaultServiceFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\submodules\Json.Fluently\source\Json.Fluently\Json.Fluently.csproj">
