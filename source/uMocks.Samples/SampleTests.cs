@@ -158,7 +158,7 @@ namespace uMocks.Samples
     }
 
     [TestMethod]
-    public void Current_Should_HaveProperImageUrlGeneratorInstance()
+    public void WithUmbracoService_Should_ConfigureProperUmbracoServiceInstance()
     {
       // Arrange
       var imageUrlGeneratorMock = new Mock<IImageUrlGenerator>();
@@ -169,6 +169,17 @@ namespace uMocks.Samples
 
       // Assert
       Assert.AreSame(imageUrlGeneratorMock.Object, Current.ImageUrlGenerator);
+    }
+
+    [TestMethod]
+    public void WithDefaultUmbracoService_Should_ConfigureProperUmbracoServiceInstance()
+    {
+      // Arrange & Act
+      var session = PublishedContentMockSession.CreateNew()
+        .WithDefaultUmbracoService<IImageUrlGenerator>();
+
+      // Assert
+      Assert.IsNotNull(Current.ImageUrlGenerator);
     }
   }
 }
