@@ -42,7 +42,7 @@ namespace uMocks
     {
       try
       {
-        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>((x) =>
+        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(x =>
         {
           var setupInfo = GetCustomSetupInfo();
           
