@@ -30,6 +30,7 @@ namespace uMocks
     public PublishedContentMockSession WithUmbracoService<TService>(TService serviceInstance)
     {
       _factoryMock.Setup(c => c.GetInstance(typeof(TService))).Returns(serviceInstance);
+      _factoryMock.Setup(c => c.TryGetInstance(typeof(TService))).Returns(serviceInstance);
 
       return this;
     }
@@ -48,6 +49,7 @@ namespace uMocks
       var serviceInstance = UmbracoDefaultServiceFactory.CreateService<TService>();
 
       _factoryMock.Setup(c => c.GetInstance(typeof(TService))).Returns(serviceInstance);
+      _factoryMock.Setup(c => c.TryGetInstance(typeof(TService))).Returns(serviceInstance);
 
       return this;
     }
@@ -66,6 +68,13 @@ namespace uMocks
           var setupInfo = GetCustomSetupInfo();
           
           throw new MockNotFoundException(x, setupInfo);
+        });
+
+        _factoryMock.Setup(c => c.TryGetInstance(It.IsAny<Type>())).Returns<Type>(x =>
+        {
+            var setupInfo = GetCustomSetupInfo();
+
+            throw new MockNotFoundException(x, setupInfo);
         });
 
         Current.Factory = _factoryMock.Object;
