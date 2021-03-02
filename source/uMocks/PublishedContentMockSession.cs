@@ -5,6 +5,7 @@ using System.Reflection;
 using Moq;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.PublishedContent;
 using uMocks.Builders;
 using uMocks.Builders.Abstract;
 using uMocks.Exceptions;
@@ -14,6 +15,8 @@ namespace uMocks
   public class PublishedContentMockSession
   {
     private readonly Mock<IFactory> _factoryMock = new Mock<IFactory>();
+
+    private static PublishedContentMockSession _sessionInstance;
 
     public IPublishedContentMockBuilder PublishedContentBuilder { get; }
 
@@ -25,6 +28,14 @@ namespace uMocks
       GridEditorBuilder = new GridEditorBuilder();
 
       TryInitializeFactory();
+    }
+
+    public static PublishedContentMockSession CreateOrGet()
+    {
+        if (_sessionInstance == null)
+            _sessionInstance = new PublishedContentMockSession();
+
+        return _sessionInstance;
     }
 
     public PublishedContentMockSession WithUmbracoService<TService>(TService serviceInstance)
@@ -54,9 +65,12 @@ namespace uMocks
       return this;
     }
 
-    public static PublishedContentMockSession CreateNew()
+    public void Reset()
     {
-      return new PublishedContentMockSession();
+        _factoryMock.Invocations.Clear();
+        _factoryMock.Reset();
+
+        TryInitializeFactory();
     }
 
     private void TryInitializeFactory()
@@ -65,7 +79,13 @@ namespace uMocks
       {
         _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(x =>
         {
-          var setupInfo = GetCustomSetupInfo();
+            if (x == typeof(TypeLoader))
+                return null; // override type loader to prevent Umbraco from loading types
+
+            if (x == typeof(IVariationContextAccessor))
+                return null; // override variation context accessor to prevent Umbraco from searching for cultures
+
+            var setupInfo = GetCustomSetupInfo();
           
           throw new MockNotFoundException(x, setupInfo);
         });
