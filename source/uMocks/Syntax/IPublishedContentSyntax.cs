@@ -24,6 +24,8 @@ namespace uMocks.Syntax
 
     IPublishedContentSyntax WithUrl(string url);
 
+    IPublishedContentSyntax WithKey(Guid key);
+
     IPublishedContent Build();
   }
 }

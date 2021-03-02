@@ -70,7 +70,6 @@ namespace uMocks.Builders
         propertyMock.Setup(p => p.GetValue(culture, It.IsAny<string>())).Returns(value);
         propertyMock.Setup(p => p.GetSourceValue(culture, It.IsAny<string>())).Returns(value);
         
-
         var propertyTypeMock = new Mock<IPublishedPropertyType>();
 
         propertyTypeMock.Setup(p => p.Alias).Returns(propertyAlias);
@@ -161,6 +160,13 @@ namespace uMocks.Builders
       public IPublishedContentSyntax WithUrl(string url)
       {
         PublishedContentMock.Setup(c => c.Url).Returns(url);
+
+        return this;
+      }
+
+      public IPublishedContentSyntax WithKey(Guid key)
+      {
+        PublishedContentMock.Setup(c => c.Key).Returns(key);
 
         return this;
       }
