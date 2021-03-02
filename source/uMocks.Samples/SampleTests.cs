@@ -4,7 +4,9 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Models;
+using Umbraco.Core.Strings;
 using Umbraco.Web;
 using uMocks.Exceptions;
 using uMocks.Extensions;
@@ -14,6 +16,12 @@ namespace uMocks.Samples
   [TestClass]
   public class SampleTests
   {
+    [TestCleanup]
+    public void TestCleanup()
+    {
+      PublishedContentMockSession.CreateOrGet().Reset();
+    }
+
     [TestMethod]
     public void PublishedContent_ShouldBeMockedProperly()
     {
@@ -54,9 +62,6 @@ namespace uMocks.Samples
       Assert.AreEqual("-1,1001,1002,1003", doc3.Path);
       Assert.AreEqual(2, doc2.Children.Count());
       Assert.AreEqual(1002, doc4.Parent.Id);
-
-      // most extension methods evaluates properly (methods independent on HttpContext and ApplicationContext)
-      Assert.AreEqual(1, doc3.Siblings().Count());
     }
 
     [TestMethod]
@@ -214,6 +219,19 @@ namespace uMocks.Samples
         // Assert
         Assert.IsNotNull(Current.ImageUrlGenerator);
         Assert.AreSame(imageUrlGeneratorMock.Object, Current.ImageUrlGenerator);
+    }
+
+    [TestMethod]
+    public void WithUmbracoService_Should_ConfigureGivenServiceInstanceProperly()
+    {
+      // Arrange
+      var shortStringHelper = new DefaultShortStringHelper(new DefaultShortStringHelperConfig());
+      var sessionMock = PublishedContentMockSession.CreateOrGet()
+        .WithUmbracoService<IShortStringHelper>(shortStringHelper);
+      var dataTypeMock = new Mock<IDataType>();
+
+      // Act & Assert
+      var property = new Property(new PropertyType(dataTypeMock.Object, "altText"));
     }
   }
 }
