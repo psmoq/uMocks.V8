@@ -5,6 +5,7 @@ using System.Reflection;
 using Moq;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.PublishedContent;
 using uMocks.Builders;
 using uMocks.Builders.Abstract;
 using uMocks.Exceptions;
@@ -14,6 +15,8 @@ namespace uMocks
   public class PublishedContentMockSession
   {
     private readonly Mock<IFactory> _factoryMock = new Mock<IFactory>();
+
+    private static PublishedContentMockSession _sessionInstance;
 
     public IPublishedContentMockBuilder PublishedContentBuilder { get; }
 
@@ -27,9 +30,18 @@ namespace uMocks
       TryInitializeFactory();
     }
 
+    public static PublishedContentMockSession CreateOrGet()
+    {
+        if (_sessionInstance == null)
+            _sessionInstance = new PublishedContentMockSession();
+
+        return _sessionInstance;
+    }
+
     public PublishedContentMockSession WithUmbracoService<TService>(TService serviceInstance)
     {
       _factoryMock.Setup(c => c.GetInstance(typeof(TService))).Returns(serviceInstance);
+      _factoryMock.Setup(c => c.TryGetInstance(typeof(TService))).Returns(serviceInstance);
 
       return this;
     }
@@ -48,31 +60,45 @@ namespace uMocks
       var serviceInstance = UmbracoDefaultServiceFactory.CreateService<TService>();
 
       _factoryMock.Setup(c => c.GetInstance(typeof(TService))).Returns(serviceInstance);
+      _factoryMock.Setup(c => c.TryGetInstance(typeof(TService))).Returns(serviceInstance);
 
       return this;
     }
 
-    public static PublishedContentMockSession CreateNew()
+    public void Reset()
     {
-      return new PublishedContentMockSession();
+        _factoryMock.Invocations.Clear();
+        _factoryMock.Reset();
+
+        TryInitializeFactory();
     }
 
     private void TryInitializeFactory()
     {
       try
       {
-        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(x =>
-        {
-          var setupInfo = GetCustomSetupInfo();
-          
-          throw new MockNotFoundException(x, setupInfo);
-        });
+        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(ResolveMock);
+
+        _factoryMock.Setup(c => c.TryGetInstance(It.IsAny<Type>())).Returns<Type>(ResolveMock);
 
         Current.Factory = _factoryMock.Object;
       }
       catch
       {
         // swallow - 'Current' is a poor singleton
+      }
+
+      object ResolveMock(Type mockType)
+      {
+        if (mockType == typeof(TypeLoader))
+          return null; // override type loader to prevent Umbraco from loading types
+
+        if (mockType == typeof(IVariationContextAccessor))
+          return null; // override variation context accessor to prevent Umbraco from searching for cultures
+
+        var setupInfo = GetCustomSetupInfo();
+
+        throw new MockNotFoundException(mockType, setupInfo);
       }
     }
 

@@ -4,8 +4,11 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Models;
+using Umbraco.Core.Strings;
 using Umbraco.Web;
+using uMocks.Exceptions;
 using uMocks.Extensions;
 
 namespace uMocks.Samples
@@ -13,12 +16,18 @@ namespace uMocks.Samples
   [TestClass]
   public class SampleTests
   {
+    [TestCleanup]
+    public void TestCleanup()
+    {
+      PublishedContentMockSession.CreateOrGet().Reset();
+    }
+
     [TestMethod]
     public void PublishedContent_ShouldBeMockedProperly()
     {
       // Arrange
 
-      var mockSession = PublishedContentMockSession.CreateNew();
+      var mockSession = PublishedContentMockSession.CreateOrGet();
       var doc1 = mockSession.PublishedContentBuilder
         .PrepareNew("documentTypeAlias", documentId: 1001)
         .WithProperty("propAlias", "propValue")
@@ -53,9 +62,6 @@ namespace uMocks.Samples
       Assert.AreEqual("-1,1001,1002,1003", doc3.Path);
       Assert.AreEqual(2, doc2.Children.Count());
       Assert.AreEqual(1002, doc4.Parent.Id);
-
-      // most extension methods evaluates properly (methods independent on HttpContext and ApplicationContext)
-      Assert.AreEqual(1, doc3.Siblings().Count());
     }
 
     [TestMethod]
@@ -63,7 +69,7 @@ namespace uMocks.Samples
     {
       // Arrange
 
-      var mockSession = PublishedContentMockSession.CreateNew();
+      var mockSession = PublishedContentMockSession.CreateOrGet();
       var doc1 = mockSession.PublishedContentBuilder
         .PrepareNew("documentTypeAlias", documentId: 1001)
         .WithProperty("propAlias", "propValue")
@@ -96,7 +102,7 @@ namespace uMocks.Samples
       var createDate = DateTime.Today.AddDays(-10).AddYears(-1);
       var updateDate = DateTime.Today.AddDays(-10);
 
-      var mockSession = PublishedContentMockSession.CreateNew();
+      var mockSession = PublishedContentMockSession.CreateOrGet();
       var doc1 = mockSession.PublishedContentBuilder
         .PrepareNew("documentTypeAlias", documentId: 1001)
         .CreatedAt(createDate)
@@ -114,7 +120,7 @@ namespace uMocks.Samples
     {
       // Arrange
 
-      var mockSession = PublishedContentMockSession.CreateNew();
+      var mockSession = PublishedContentMockSession.CreateOrGet();
       var gridEditor = mockSession.GridEditorBuilder
         .CreateNew("1 column layout")
         .AddSection(12)
@@ -164,7 +170,7 @@ namespace uMocks.Samples
       var imageUrlGeneratorMock = new Mock<IImageUrlGenerator>();
 
       // Act
-      var session = PublishedContentMockSession.CreateNew()
+      var session = PublishedContentMockSession.CreateOrGet()
         .WithUmbracoService(imageUrlGeneratorMock.Object);
 
       // Assert
@@ -175,11 +181,57 @@ namespace uMocks.Samples
     public void WithDefaultUmbracoService_Should_ConfigureProperUmbracoServiceInstance()
     {
       // Arrange & Act
-      var session = PublishedContentMockSession.CreateNew()
+      var session = PublishedContentMockSession.CreateOrGet()
         .WithDefaultUmbracoService<IImageUrlGenerator>();
 
       // Assert
       Assert.IsNotNull(Current.ImageUrlGenerator);
+    }
+
+    [TestMethod]
+    public void Reset_Should_CleanSessionSetup()
+    {
+        // Arrange & Act
+        var session = PublishedContentMockSession.CreateOrGet()
+            .WithDefaultUmbracoService<IImageUrlGenerator>();
+
+        // Assert
+        Assert.IsNotNull(Current.ImageUrlGenerator);
+
+        // Arrange & Act
+        session.Reset();
+
+        // Assert
+        try
+        {
+            var sut = Current.ImageUrlGenerator;
+        }
+        catch (MockNotFoundException e)
+        {
+            Assert.IsNotNull(e);
+        }
+
+        // Arrange & Act
+        var imageUrlGeneratorMock = new Mock<IImageUrlGenerator>();
+        session = PublishedContentMockSession.CreateOrGet()
+            .WithUmbracoService(imageUrlGeneratorMock.Object);
+
+        // Assert
+        Assert.IsNotNull(Current.ImageUrlGenerator);
+        Assert.AreSame(imageUrlGeneratorMock.Object, Current.ImageUrlGenerator);
+    }
+
+    [TestMethod]
+    public void WithUmbracoService_Should_ConfigureGivenServiceInstanceProperly()
+    {
+      // Arrange
+      var shortStringHelper = new DefaultShortStringHelper(new DefaultShortStringHelperConfig());
+      var sessionMock = PublishedContentMockSession.CreateOrGet()
+        .WithUmbracoService<IShortStringHelper>(shortStringHelper);
+      var dataTypeMock = new Mock<IDataType>();
+
+      // Act & Assert
+      var property = new Property(new PropertyType(dataTypeMock.Object, "altText"));
     }
   }
 }
