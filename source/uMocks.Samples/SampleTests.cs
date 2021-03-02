@@ -16,6 +16,12 @@ namespace uMocks.Samples
   [TestClass]
   public class SampleTests
   {
+    [TestCleanup]
+    public void TestCleanup()
+    {
+      PublishedContentMockSession.CreateOrGet().Reset();
+    }
+
     [TestMethod]
     public void PublishedContent_ShouldBeMockedProperly()
     {
@@ -220,7 +226,7 @@ namespace uMocks.Samples
     {
       // Arrange
       var shortStringHelper = new DefaultShortStringHelper(new DefaultShortStringHelperConfig());
-      var sessionMock = PublishedContentMockSession.CreateNew()
+      var sessionMock = PublishedContentMockSession.CreateOrGet()
         .WithUmbracoService<IShortStringHelper>(shortStringHelper);
       var dataTypeMock = new Mock<IDataType>();
 

@@ -77,31 +77,28 @@ namespace uMocks
     {
       try
       {
-        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(x =>
-        {
-            if (x == typeof(TypeLoader))
-                return null; // override type loader to prevent Umbraco from loading types
+        _factoryMock.Setup(c => c.GetInstance(It.IsAny<Type>())).Returns<Type>(ResolveMock);
 
-            if (x == typeof(IVariationContextAccessor))
-                return null; // override variation context accessor to prevent Umbraco from searching for cultures
-
-            var setupInfo = GetCustomSetupInfo();
-          
-          throw new MockNotFoundException(x, setupInfo);
-        });
-
-        _factoryMock.Setup(c => c.TryGetInstance(It.IsAny<Type>())).Returns<Type>(x =>
-        {
-            var setupInfo = GetCustomSetupInfo();
-
-            throw new MockNotFoundException(x, setupInfo);
-        });
+        _factoryMock.Setup(c => c.TryGetInstance(It.IsAny<Type>())).Returns<Type>(ResolveMock);
 
         Current.Factory = _factoryMock.Object;
       }
       catch
       {
         // swallow - 'Current' is a poor singleton
+      }
+
+      object ResolveMock(Type mockType)
+      {
+        if (mockType == typeof(TypeLoader))
+          return null; // override type loader to prevent Umbraco from loading types
+
+        if (mockType == typeof(IVariationContextAccessor))
+          return null; // override variation context accessor to prevent Umbraco from searching for cultures
+
+        var setupInfo = GetCustomSetupInfo();
+
+        throw new MockNotFoundException(mockType, setupInfo);
       }
     }
 
