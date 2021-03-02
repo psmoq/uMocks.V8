@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>uMocks.V8</id>
+    <version>2.1.0</version>
+    <title>uMocks.V8</title>
+    <description>Umbraco 8 CMS content mocking helper</description>
+    <authors>Przemyslaw Smokowski</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/psmoq/uMocks.V8</projectUrl>
+    <releaseNotes>
+    - Extended factory mockup with additional instantiation methods
+    - Extended fluent syntax with 'Key' property of IPublishedContent
+    - Upgraded Umbraco to 8.10.1
+    </releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>Umbraco UmbracoCMS Mock Mocks Mocking</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2" />
+    </dependencies>
+  </metadata>
+</package>
